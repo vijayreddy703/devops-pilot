@@ -1,0 +1,43 @@
+pipeline {
+  agent any
+
+  tools {
+    nodejs "Node 18"  // Configure this name in Jenkins Global Tools
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git 'https://github.com/YOUR_USERNAME/devops-portfolio.git'
+      }
+    }
+
+    stage('Install Dependencies') {
+      steps {
+        dir('client') {
+          sh 'npm install'
+        }
+      }
+    }
+
+    stage('Build React App') {
+      steps {
+        dir('client') {
+          sh 'npm run build'
+        }
+      }
+    }
+
+    stage('Docker Build & Run') {
+      steps {
+        script {
+          dir('client') {
+            sh 'docker build -t devops-portfolio .'
+            sh 'docker rm -f devops-site || true'
+            sh 'docker run -d -p 3000:3000 --name devops-site devops-portfolio'
+          }
+        }
+      }
+    }
+  }
+}
